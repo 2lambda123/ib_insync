@@ -8,6 +8,7 @@ from urllib.request import urlopen
 
 from ib_insync import util
 from ib_insync.objects import DynamicObject
+import defusedxml.ElementTree
 
 _logger = logging.getLogger('ib_insync.flexreport')
 
@@ -74,7 +75,7 @@ class FlexReport:
         resp = urlopen(url)
         data = resp.read()
 
-        root = et.fromstring(data)
+        root = defusedxml.ElementTree.fromstring(data)
         elem = root.find('Status')
         if elem is not None and elem.text == 'Success':
             elem = root.find('ReferenceCode')
@@ -96,7 +97,7 @@ class FlexReport:
             url = f'{baseUrl}?q={code}&t={token}'
             resp = urlopen(url)
             self.data = resp.read()
-            self.root = et.fromstring(self.data)
+            self.root = defusedxml.ElementTree.fromstring(self.data)
             if self.root[0].tag == 'code':
                 msg = self.root[0].text
                 if msg and msg.startswith('Statement generation in progress'):
@@ -111,7 +112,7 @@ class FlexReport:
         """Load report from XML file."""
         with open(path, 'rb') as f:
             self.data = f.read()
-            self.root = et.fromstring(self.data)
+            self.root = defusedxml.ElementTree.fromstring(self.data)
 
     def save(self, path):
         """Save report to XML file."""
